@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalAnimationApi::class)
+
 package com.example.quizapp
 
 import android.os.Bundle
@@ -21,7 +23,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Blue
+import androidx.compose.ui.graphics.Color.Companion.Green
 import androidx.compose.ui.graphics.Color.Companion.LightGray
+import androidx.compose.ui.graphics.Color.Companion.Red
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -63,9 +68,13 @@ fun PlayQuiz(name: String, quizlist: List<QuizItem>) {
         enter = slideIn(tween(300, easing = LinearOutSlowInEasing)) {
             IntOffset(it.width / 2, 100)
         },
-        exit = slideOut(tween(100, easing = FastOutSlowInEasing)) {
-            IntOffset(-180, 50)
-        }) {
+        exit = scaleOut(
+            tween(
+                durationMillis = 300,
+                easing = FastOutSlowInEasing
+            )
+        ) + shrinkVertically(shrinkTowards = Alignment.CenterVertically)
+    ) {
         Surface(color = MaterialTheme.colors.primary) {
             TextButton(onClick = { visible = false }) {
                 Text(text = "Hello $name!. Do you want to play Quiz?", color = Color.White)
@@ -88,19 +97,6 @@ fun PlayQuiz(name: String, quizlist: List<QuizItem>) {
 @Composable
 private fun ShowQuestions(
     quesList: List<QuizItem>
-//    = listOf(
-//        "Several characters in Super Mario blink their eyes.",
-//        "BMW M GmbH is a subsidiary of BMW AG that focuses on car performance.",
-//        "When was the game Roblox released?",
-//        "Who is the author of Jurrasic Park?",
-//        "In Geometry Dash, what is level 13?",
-//        "Popcorn was invented in 1871 by Frederick W. Rueckheim in the USA where he sold the snack on the streets of Chicago.",
-//        "What album did Gorillaz release in 2017?",
-//        "Which U.S. President was famously attacked by a swimming rabbit?",
-//        "Several characters in Super Mario blink their eyes.",
-//        "BMW M GmbH is a subsidiary of BMW AG that focuses on car performance.",
-//        "In Geometry Dash, what is level 13?"
-//    )
 ) {
 
     LazyColumn(
@@ -120,11 +116,24 @@ private fun ShowQuestions(
     }
 }
 
+enum class Answer {
+    NOTHING,
+    CORRECT,
+    WRONG
+}
+
 @Composable
 private fun RenderQuestion(title: String, correctAnswer: Boolean) {
     var visible by remember { mutableStateOf(true) }
     var expanded by remember { mutableStateOf(false) }
-    var rowColor by remember { mutableStateOf(Color.Blue) }
+    var userAnswer by remember { mutableStateOf(Answer.NOTHING) }
+    val rowColor by animateColorAsState(
+        when (userAnswer) {
+            Answer.NOTHING -> Blue
+            Answer.CORRECT -> Green
+            else -> Red
+        }
+    )
 
     AnimatedVisibility(
         visible = visible,
@@ -138,8 +147,9 @@ private fun RenderQuestion(title: String, correctAnswer: Boolean) {
                 .padding(vertical = 4.dp, horizontal = 8.dp)
         ) {
             Column(modifier = Modifier.padding(all = 4.dp)) {
-                TextButton(onClick = { expanded = !expanded }) {
+                TextButton(onClick = { if (userAnswer != Answer.CORRECT) expanded = !expanded }) {
                     Text(text = "Ques: $title!", color = Color.White)
+
                 }
                 AnimatedVisibility(visible = expanded) {
                     Row(
@@ -149,12 +159,12 @@ private fun RenderQuestion(title: String, correctAnswer: Boolean) {
                     ) {
                         OutlinedButton(
                             onClick = {
-                                // change color
-                                if (correctAnswer) {
+                                userAnswer = if (correctAnswer) {
                                     expanded = !expanded
-                                    rowColor = Color.Green
+                                    Answer.CORRECT
                                 } else {
-                                    rowColor = Color.Red
+                                    Answer.WRONG
+
                                 }
                             },
                             shape = MaterialTheme.shapes.medium,
@@ -167,12 +177,15 @@ private fun RenderQuestion(title: String, correctAnswer: Boolean) {
 
                         OutlinedButton(
                             onClick = {
-                                rowColor = if (correctAnswer) {
-                                    Color.Red
-                                } else {
-                                    expanded = !expanded
-                                    Color.Green
-                                }
+
+                                userAnswer =
+                                    if (correctAnswer) {
+                                        Answer.WRONG
+                                    } else {
+                                        expanded = !expanded
+                                        Answer.CORRECT
+                                    }
+
                             },
                             shape = MaterialTheme.shapes.medium,
                             modifier = Modifier
@@ -184,67 +197,6 @@ private fun RenderQuestion(title: String, correctAnswer: Boolean) {
                     }
                 }
             }
-        }
-    }
-}
-
-//@Preview(showBackground = true)
-//@Composable
-//fun DefaultPreview() {
-//    QuizAppTheme {
-//        PlayQuiz("Android")
-//    }
-//}
-
-@Composable
-fun QuizItemView(quizItem: QuizItem) {
-    Card(
-        modifier = Modifier
-            .padding(8.dp, 4.dp)
-            .fillMaxWidth()
-            .height(110.dp), shape = RoundedCornerShape(8.dp), elevation = 4.dp
-    ) {
-        Surface() {
-
-            Row(
-                Modifier
-                    .padding(4.dp)
-                    .fillMaxSize()
-            ) {
-
-                Column(
-                    verticalArrangement = Arrangement.Center,
-                    modifier = Modifier
-                        .padding(4.dp)
-                        .fillMaxHeight()
-                        .weight(0.8f)
-                ) {
-                    Text(
-                        text = quizItem.question,
-                        style = MaterialTheme.typography.subtitle1,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = quizItem.category,
-                        style = MaterialTheme.typography.caption,
-                        modifier = Modifier
-                            .background(
-                                color = LightGray
-                            )
-                            .padding(4.dp)
-                    )
-
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun QuizListView(quizList: List<QuizItem>) {
-    LazyColumn {
-        itemsIndexed(items = quizList) { index, item ->
-            QuizItemView(quizItem = item)
         }
     }
 }
