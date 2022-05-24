@@ -13,6 +13,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -77,7 +78,7 @@ fun PlayQuiz(name: String, quizlist: List<QuizItem>) {
         enter = slideInVertically(initialOffsetY = { -100 }) + expandVertically(expandFrom = Alignment.Top),
         exit = slideOutVertically() + shrinkVertically()
     ) {
-        Surface(color = MaterialTheme.colors.primary) {
+        Surface(color = MaterialTheme.colors.background) {
             ShowQuestions(quizlist)
         }
     }
@@ -102,16 +103,18 @@ private fun ShowQuestions(
 //    )
 ) {
 
-    Surface(
-        color = MaterialTheme.colors.background
+    LazyColumn(
+        modifier = Modifier.fillMaxHeight(),
+        contentPadding = PaddingValues(16.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 10.dp)
-        ) {
-            for (quiz in quesList) {
+        items(quesList) { quiz ->
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 10.dp)
+            ) {
                 RenderQuestion(title = quiz.question, correctAnswer = quiz.correct_answer)
+
             }
         }
     }
