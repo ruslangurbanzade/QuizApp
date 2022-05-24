@@ -45,7 +45,7 @@ class MainActivity : ComponentActivity() {
                         .wrapContentHeight(align = Alignment.CenterVertically),
                     color = MaterialTheme.colors.background
                 ) {
-                    PlayQuiz("Android")
+                    PlayQuiz("Android", mainViewModel.quizList)
                 }
             }
             mainViewModel.getQuiz()
@@ -54,14 +54,17 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun PlayQuiz(name: String) {
+fun PlayQuiz(name: String, quizlist: List<QuizItem>) {
     var visible by remember { mutableStateOf(true) }
 
-    AnimatedVisibility(visible = visible, enter = slideIn(tween(300, easing = LinearOutSlowInEasing)) {
-        IntOffset(it.width / 2, 100)
-    }, exit = slideOut(tween(100, easing = FastOutSlowInEasing)) {
-        IntOffset(-180, 50)
-    }) {
+    AnimatedVisibility(
+        visible = visible,
+        enter = slideIn(tween(300, easing = LinearOutSlowInEasing)) {
+            IntOffset(it.width / 2, 100)
+        },
+        exit = slideOut(tween(100, easing = FastOutSlowInEasing)) {
+            IntOffset(-180, 50)
+        }) {
         Surface(color = MaterialTheme.colors.primary) {
             TextButton(onClick = { visible = false }) {
                 Text(text = "Hello $name!. Do you want to play Quiz?", color = Color.White)
@@ -72,36 +75,43 @@ fun PlayQuiz(name: String) {
     AnimatedVisibility(
         visible = !visible,
         enter = slideInVertically(initialOffsetY = { -100 }) + expandVertically(expandFrom = Alignment.Top),
-        exit = slideOutVertically() + shrinkVertically()) {
+        exit = slideOutVertically() + shrinkVertically()
+    ) {
         Surface(color = MaterialTheme.colors.primary) {
-            ShowQuestions()
+            ShowQuestions(quizlist)
         }
     }
 
 }
 
 @Composable
-private fun ShowQuestions(quesList: List<String> = listOf(
-    "Several characters in Super Mario blink their eyes.",
-    "BMW M GmbH is a subsidiary of BMW AG that focuses on car performance.",
-    "When was the game Roblox released?",
-    "Who is the author of Jurrasic Park?",
-    "In Geometry Dash, what is level 13?",
-    "Popcorn was invented in 1871 by Frederick W. Rueckheim in the USA where he sold the snack on the streets of Chicago.",
-    "What album did Gorillaz release in 2017?",
-    "Which U.S. President was famously attacked by a swimming rabbit?",
-    "Several characters in Super Mario blink their eyes.",
-    "BMW M GmbH is a subsidiary of BMW AG that focuses on car performance.",
-    "In Geometry Dash, what is level 13?")) {
+private fun ShowQuestions(
+    quesList: List<QuizItem>
+//    = listOf(
+//        "Several characters in Super Mario blink their eyes.",
+//        "BMW M GmbH is a subsidiary of BMW AG that focuses on car performance.",
+//        "When was the game Roblox released?",
+//        "Who is the author of Jurrasic Park?",
+//        "In Geometry Dash, what is level 13?",
+//        "Popcorn was invented in 1871 by Frederick W. Rueckheim in the USA where he sold the snack on the streets of Chicago.",
+//        "What album did Gorillaz release in 2017?",
+//        "Which U.S. President was famously attacked by a swimming rabbit?",
+//        "Several characters in Super Mario blink their eyes.",
+//        "BMW M GmbH is a subsidiary of BMW AG that focuses on car performance.",
+//        "In Geometry Dash, what is level 13?"
+//    )
+) {
 
     Surface(
         color = MaterialTheme.colors.background
     ) {
-        Column(modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 10.dp)) {
-            for (question in quesList) {
-                RenderQuestion(title = question, correctAnswer = false)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 10.dp)
+        ) {
+            for (quiz in quesList) {
+                RenderQuestion(title = quiz.question, correctAnswer = quiz.correct_answer)
             }
         }
     }
@@ -113,19 +123,27 @@ private fun RenderQuestion(title: String, correctAnswer: Boolean) {
     var expanded by remember { mutableStateOf(false) }
     var rowColor by remember { mutableStateOf(Color.Blue) }
 
-    AnimatedVisibility(visible = visible, enter = fadeIn(initialAlpha = 0.4f), exit = fadeOut(animationSpec = tween(durationMillis = 250))) {
-        Surface(color = rowColor,
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn(initialAlpha = 0.4f),
+        exit = fadeOut(animationSpec = tween(durationMillis = 250))
+    ) {
+        Surface(
+            color = rowColor,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 4.dp, horizontal = 8.dp)) {
+                .padding(vertical = 4.dp, horizontal = 8.dp)
+        ) {
             Column(modifier = Modifier.padding(all = 4.dp)) {
                 TextButton(onClick = { expanded = !expanded }) {
                     Text(text = "Ques: $title!", color = Color.White)
                 }
                 AnimatedVisibility(visible = expanded) {
-                    Row(modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 4.dp)) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 4.dp)
+                    ) {
                         OutlinedButton(
                             onClick = {
                                 // change color
@@ -135,7 +153,7 @@ private fun RenderQuestion(title: String, correctAnswer: Boolean) {
                                 } else {
                                     rowColor = Color.Red
                                 }
-                                      },
+                            },
                             shape = MaterialTheme.shapes.medium,
                             modifier = Modifier
                                 .padding(horizontal = 16.dp)
@@ -167,13 +185,13 @@ private fun RenderQuestion(title: String, correctAnswer: Boolean) {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    QuizAppTheme {
-        PlayQuiz("Android")
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun DefaultPreview() {
+//    QuizAppTheme {
+//        PlayQuiz("Android")
+//    }
+//}
 
 @Composable
 fun QuizItemView(quizItem: QuizItem) {
