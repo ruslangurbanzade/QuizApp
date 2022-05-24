@@ -41,7 +41,7 @@ fun Greeting(name: String) {
     AnimatedVisibility(visible = visible) {
         TextButton(onClick = { visible = false }) {
 
-            Text(text = "Hello $name!")
+            Text(text = "Hello $name!. Do you want to play Quiz")
         }
     }
 }
