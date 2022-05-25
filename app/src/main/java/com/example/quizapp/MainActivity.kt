@@ -148,7 +148,7 @@ private fun RenderQuestion(title: String, correctAnswer: Boolean) {
         ) {
             Column(modifier = Modifier.padding(all = 4.dp)) {
                 TextButton(onClick = { if (userAnswer != Answer.CORRECT) expanded = !expanded }) {
-                    Text(text = "Ques: $title!", color = Color.White)
+                    Text(text = "$title!", color = Color.White)
 
                 }
                 AnimatedVisibility(visible = expanded) {
